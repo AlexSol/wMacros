@@ -16,8 +16,9 @@ Library
 		+ FileCopy
 		+ FileDel
 -	Dir:
-		+ DirCopy
+		? DirCopy
 		+ DirDel
+		+ DirRename
 ==============================
 
 -RunWait:

@@ -47,8 +47,11 @@ void Run(const char* cmd1, const char* cmd2)
 	si.cb = sizeof(si);
 	PROCESS_INFORMATION pi = {0};
 
-	char *Tcmd2 = const_cast<char*>(cmd2);
-	CreateProcess(cmd1, Tcmd2, NULL, NULL, true, 0, NULL, NULL, &si, &pi);
+	std::string scmd2 = cmd1;
+	scmd2 += " ";
+	scmd2 += cmd2;
+
+	CreateProcess(NULL, const_cast<char*>(scmd2.c_str()), NULL, NULL, true, 0, NULL, NULL, &si, &pi);
 }
 
 void RunWait(const char* cmd1, const char* cmd2)
@@ -120,9 +123,7 @@ void DirOperation(const char* cmd1, const char* cmd2, const char opt)
 {
 
 	HMODULE hLibrary =  LoadLibrary("Shell32.dll");
-	if (hLibrary != NULL)
-	{
-		
+	if (hLibrary != NULL){
 		FreeLibrary(hLibrary);
 	}
 

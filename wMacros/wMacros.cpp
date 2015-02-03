@@ -20,6 +20,8 @@ using namespace std;
 
 #include "listCommand.h"
 
+void DirCopy(const char* cmd1, char* cmd2);
+
 struct sCommand
 {
 	void (*fun)(const char* cmd1, const char* cmd2);
@@ -36,13 +38,6 @@ bool isScript();
 void Fn();
 
 void RunCommand(sCommand *);
-
-void Run(const char* cmd1, const char* cmd2);
-void FileCopy(const char* cmd1, const char* cmd2);
-void FileDel(const char* cmd1, const char* cmd2);
-
-void DirCopy(const char* cmd1, const char* cmd2);
-void DirDel(const char* cmd1, const char* cmd2);
 
 void strTolower(std::string& str);
 
@@ -107,7 +102,7 @@ void Fn()
 	listCommand.insert( pair<char*, Command>("FileCopy", FileCopy) );
 	listCommand.insert( pair<char*, Command>("FileDell", FileDel) );
 
-	listCommand.insert( pair<char*, Command>("DirCopy", DirCopy) );
+	//listCommand.insert( pair<char*, Command>("DirCopy", DirCopy) );
 	listCommand.insert( pair<char*, Command>("DirDell", DirDel) );
 	listCommand.insert( pair<char*, Command>("DirMove", DirMove) );
 	listCommand.insert( pair<char*, Command>("DirRename", DirRename) );
@@ -227,140 +222,6 @@ void Fn()
 	
 	fileMacros.close();
 }
-
-
-/*
-void Fn()
-{
-	typedef void (*Command)(const char*, const char*);
-
-	std::map<char*, Command> listCommand;
-
-	listCommand.insert( pair<char*, Command>("Run", Run) );
-	listCommand.insert( pair<char*, Command>("Run", Open) );
-
-	listCommand.insert( pair<char*, Command>("FileCopy", FileCopy) );
-	listCommand.insert( pair<char*, Command>("FileDell", FileDell) );
-
-	listCommand.insert( pair<char*, Command>("DirCopy", DirCopy) );
-	listCommand.insert( pair<char*, Command>("DirDell", DirDell) );
-
-	auto search = listCommand.find("Run");
-	if(search != listCommand.end()){
-	
-	}
-	
-	char *file = "d:\\Test.wMacros";
-	std::ifstream fileMacros;
-	fileMacros.open(file,std::ios_base::in);
-
-	//if(fileMacros.fail() == true) { cout<< "Error opend file" <<endl;} 
-
-	std::string strLine;
-
-	int indexLine = 0;
-	bool foundCommad = false;
-	char indexCmd = 0;
-
-	while (getline(fileMacros, strLine))
-	{
-		++indexLine;
-		if(strLine[0] == '#') { continue; }  //comment
-		if(strLine[0] == '$') { continue; }  //comment
-
-		if(indexCmd == 0){
-			for (auto& i :listCommand)
-			{
-				std::string tempCom = "-"; 
-				tempCom += i.first;
-				tempCom += ":";
-
-				if(tempCom == strLine) { 
-					COMMAND->fun = i.second;
-					foundCommad = true;
-					cout<< strLine << endl;
-					++indexCmd;
-					continue;
-				}
-			}
-			if(foundCommad == false) {cout<< indexLine << " : " << "Error command" <<endl; return; }
-		}else{
-			std::stringstream sstemp(strLine);
-			//sstemp << strLine;
-			std::string tCmd;
-			sstemp >> tCmd;
-
-			switch (indexCmd)
-			{
-				case 1:
-				{
-					if(tCmd != "cmd_1:") {cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;}
-					sstemp >> tCmd;
-					COMMAND->cmd_1 =  tCmd.c_str();
-					indexCmd++;
-				}
-				break;
-				case 2:
-				{
-					if(tCmd != "cmd_2:") {cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;}
-					sstemp >> tCmd;
-					COMMAND->cmd_2 =  tCmd.c_str();
-					indexCmd++;
-				}
-				break;
-				case 3:
-				{
-					if(tCmd != "os_ver:") {cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;}
-					sstemp >> tCmd;
-					COMMAND->os_ver = const_cast<char*>( tCmd.c_str());
-					indexCmd++;
-				}
-				break;
-				case 4:
-				{
-					if(tCmd != "os_type:") {cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;}
-					sstemp >> tCmd;
-					strTolower(tCmd);
-
-					if(tCmd == "0x32"){ COMMAND->os_type = 1;}
-					else{
-						if(tCmd == "0x64") {COMMAND->os_type = 2;}
-						else{
-							if(tCmd == "all")  {COMMAND->os_type = 3;}
-							else{
-								cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;
-							}
-						}
-					}
-					indexCmd++;
-				}
-				break;
-				case 5:
-				{
-					if(tCmd != "win64:") {cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;}
-					sstemp >> tCmd;
-					strTolower(tCmd);
-					if( (tCmd == "disable") || (tCmd == "enable")){
-						COMMAND->win64 =  (tCmd == "enable") ? true: false;
-					}else{
-						cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;
-					}
-					indexCmd = 6;
-				}
-				break;
-			}
-		}
-		if(indexCmd == 6){
-		RunCommand(COMMAND);
-		indexCmd = 0;
-		}
-	}
-
-	
-	fileMacros.close();
-	
-}
-*/
 	
 
 void RunCommand(sCommand * cmd)
