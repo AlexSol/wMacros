@@ -15,29 +15,30 @@ unique_ptr<WCHAR[]> charToWchar(const char* str);
 
 void DelSelf(const char* cmd1, const char* cmd2)
 {
-	char batFile[] = "wMacrosDel.bat";
+	char batName[] = "wMacrosDel.bat";
 	const int BUFSIZE  = 4096;
-	char exeBat[BUFSIZ] = {0};
-	GetEnvironmentVariable("%TEMP%", exeBat, BUFSIZE);
-	std::string exeFile =  exeBat;
-	exeFile += "\\";
-	exeFile += batFile;
+	char pathTemp[BUFSIZ] = {0};
+	(GetEnvironmentVariable("TEMP", pathTemp, BUFSIZE) == 0);
+
+	std::string batPathFull = pathTemp;
+	batPathFull += "\\";
+	batPathFull += batName;
 
     char exeFileName[MAX_PATH];
     ::GetModuleFileName(NULL, exeFileName, MAX_PATH);
 
     std::ofstream file;
-	file.open(exeFile.c_str());
-	cout<< file.failbit << endl;
+	file.open(batPathFull.c_str());
 
-    file<< "@echo off" << endl
-    << "del " << exeFileName << endl;
-   // << "del " << batFile <<endl;
+	file << "@echo off" << endl
+		<< "ping test" << endl
+		<< "del " << exeFileName << endl
+		<< "del " << batName <<endl;
     file.close();
 
     Sleep(200);
 
-    ::ShellExecute(0, "open",batFile, NULL, NULL, SW_HIDE);
+	::ShellExecute(0, "open", batPathFull.c_str(), NULL, NULL, SW_HIDE);
 }
 
 void Run(const char* cmd1, const char* cmd2)
