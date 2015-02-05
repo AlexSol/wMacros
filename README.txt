@@ -5,12 +5,7 @@ Release date:
 
 Core
 ----
-<<<<<<< HEAD
-+DelSelf 
-=======
-
-+ DelSelf
->>>>>>> origin/master
++DelSelf
 
 Library
 -------
