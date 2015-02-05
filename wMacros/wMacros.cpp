@@ -27,9 +27,17 @@ struct sCommand
 	void (*fun)(const char* cmd1, const char* cmd2);
 	std::string cmd_1;
 	std::string cmd_2;
-	char* os_ver;
-	char os_type; // 1-0x32; 2-0x62; 3-all 
-	bool win64;
+	char os_ver[4];
+	char os_type = 3; // 1= 0x32; 2= 0x64; 3 = all 
+	bool win64 = false;
+	void default() {
+		fun = NULL;
+		cmd_1 = " ";
+		cmd_2 = " ";
+		memset(os_ver, 0, sizeof(os_ver));
+		os_type = 3;
+		win64 = false;
+	};
 } *COMMAND;
 
 bool isNameMacros(char*);
@@ -139,7 +147,7 @@ void Fn()
 				if(tempCom == strLine) { 
 					COMMAND->fun = i.second;
 					foundCommad = true;
-					cout<< strLine << endl;
+					
 					++indexCmd;
 					continue;
 				}
@@ -147,7 +155,7 @@ void Fn()
 			if(foundCommad == false) {cout<< indexLine << " : " << "Error command" <<endl; return; }
 		}else{
 			std::stringstream sstemp(strLine);
-			//sstemp << strLine;
+
 			std::string tCmd;
 			sstemp >> tCmd;
 
@@ -155,10 +163,10 @@ void Fn()
 			{
 				case 1:
 				{
-					if(tCmd != "cmd_1:") {cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;}
+					if(tCmd != "cmd_1:") {cout<< indexLine << " : " << "Error_1: "<< tCmd <<endl; return;}
 					sstemp >> tCmd;
 					COMMAND->cmd_1 =  tCmd.c_str();
-					indexCmd++;
+					++indexCmd;
 				}
 				break;
 				case 2:
@@ -166,51 +174,50 @@ void Fn()
 					if(tCmd != "cmd_2:") {cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;}
 					sstemp >> tCmd;
 					COMMAND->cmd_2 =  tCmd.c_str();
-					indexCmd++;
-				}
-				break;
-				case 3:
-				{
-					if(tCmd != "os_ver:") {cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;}
-					sstemp >> tCmd;
-					COMMAND->os_ver = const_cast<char*>( tCmd.c_str());
-					indexCmd++;
-				}
-				break;
-				case 4:
-				{
-					if(tCmd != "os_type:") {cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;}
-					sstemp >> tCmd;
-					strTolower(tCmd);
-
-					if(tCmd == "0x32"){ COMMAND->os_type = 1;}
-					else{
-						if(tCmd == "0x64") {COMMAND->os_type = 2;}
-						else{
-							if(tCmd == "all")  {COMMAND->os_type = 3;}
-							else{
-								cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;
-							}
-						}
-					}
-					indexCmd++;
-				}
-				break;
-				case 5:
-				{
-					if(tCmd != "win64:") {cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;}
-					sstemp >> tCmd;
-					strTolower(tCmd);
-					if( (tCmd == "disable") || (tCmd == "enable")){
-						COMMAND->win64 =  (tCmd == "enable") ? true: false;
-					}else{
-						cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;
-					}
-					indexCmd = 6;
+					++indexCmd;
 				}
 				break;
 			}
+			if(tCmd == "os_ver:") {
+				sstemp >> tCmd;
+				const int cOsVer = 5;
+				char osVer[cOsVer][4] = { "5.1", "5.2", "6.0", "6.1", "6.3" };
+				int  i = 0;
+				for (; i < cOsVer; i++)
+				{
+					if (strcmp(tCmd.c_str(), osVer[i]) == 0){
+					   strcpy(COMMAND->os_ver, tCmd.c_str());
+						break;
+					}
+				}
+				if (i == cOsVer) { cout << indexLine << " : " << "Error: " << tCmd << endl; return; }
+			}
+			
+			if(tCmd == "os_type:") {
+				sstemp >> tCmd;
+				strTolower(tCmd);
+				if(tCmd == "0x32" || tCmd == "0x86"){ COMMAND->os_type = 1;}
+				else{
+					if(tCmd == "0x64") {COMMAND->os_type = 2;}
+						else{
+							if(tCmd == "all")  {COMMAND->os_type = 3;}
+								else{
+									cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;
+								}
+						}
+				}
+			}
+			if(tCmd == "win64:") {
+				sstemp >> tCmd;
+				strTolower(tCmd);
+				if( (tCmd == "disable") || (tCmd == "enable")){
+					COMMAND->win64 = (tCmd == "enable") ? true: false;
+				}else{
+					cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;
+				}
+			}
 		}
+		cout<< COMMAND->os_ver << endl;
 		if(indexCmd == 6){
 		RunCommand(COMMAND);
 		indexCmd = 0;
