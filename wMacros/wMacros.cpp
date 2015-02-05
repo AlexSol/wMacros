@@ -53,6 +53,7 @@ void strTolower(std::string& str);
 int main(int argc, char* argv[])
 {
 	COMMAND = new sCommand;
+	COMMAND->default();
 
 	//if (isScript() == false){ MessageBox(0, "not found Script", "Error", MB_ICONERROR); return true; }
 	/*
@@ -152,7 +153,10 @@ void Fn()
 					continue;
 				}
 			}
-			if(foundCommad == false) {cout<< indexLine << " : " << "Error command" <<endl; return; }
+			if(foundCommad == false) {
+				cout<< indexLine << " > " << "Error command" <<endl; 
+				return; 
+			}
 		}else{
 			std::stringstream sstemp(strLine);
 
@@ -163,20 +167,26 @@ void Fn()
 			{
 				case 1:
 				{
-					if(tCmd != "cmd_1:") {cout<< indexLine << " : " << "Error_1: "<< tCmd <<endl; return;}
+					if(tCmd != "cmd_1:") {
+						cout<< indexLine << " > " << "Error: cmd_1 - "<< tCmd <<endl; 
+						return;
+				}
 					sstemp >> tCmd;
 					COMMAND->cmd_1 =  tCmd.c_str();
 					++indexCmd;
 				}
-				break;
+				continue;
 				case 2:
 				{
-					if(tCmd != "cmd_2:") {cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;}
+					if(tCmd != "cmd_2:") {
+						cout<< indexLine << " > " << "Error: cmd_2 - "<< tCmd <<endl; 
+						return;
+					}
 					sstemp >> tCmd;
 					COMMAND->cmd_2 =  tCmd.c_str();
 					++indexCmd;
 				}
-				break;
+				continue;
 			}
 			if(tCmd == "os_ver:") {
 				sstemp >> tCmd;
@@ -190,7 +200,11 @@ void Fn()
 						break;
 					}
 				}
-				if (i == cOsVer) { cout << indexLine << " : " << "Error: " << tCmd << endl; return; }
+				if (i == cOsVer) { 
+					cout << indexLine << " > " << "Error: os_ver - " << tCmd << endl; 
+					return; 
+				}
+				continue;
 			}
 			
 			if(tCmd == "os_type:") {
@@ -202,10 +216,12 @@ void Fn()
 						else{
 							if(tCmd == "all")  {COMMAND->os_type = 3;}
 								else{
-									cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;
+									cout<< indexLine << " > " << "Error: os_type - "<< tCmd <<endl; 
+									return;
 								}
 						}
 				}
+				continue;
 			}
 			if(tCmd == "win64:") {
 				sstemp >> tCmd;
@@ -213,14 +229,16 @@ void Fn()
 				if( (tCmd == "disable") || (tCmd == "enable")){
 					COMMAND->win64 = (tCmd == "enable") ? true: false;
 				}else{
-					cout<< indexLine << " : " << "Error: "<< tCmd <<endl; return;
+					cout<< indexLine << " > " << "Error: win64 - "<< tCmd <<endl; 
+					return;
 				}
+				continue;
 			}
 		}
-		cout<< COMMAND->os_ver << endl;
-		if(indexCmd == 6){
-		RunCommand(COMMAND);
-		indexCmd = 0;
+		if(indexCmd == 3){
+			RunCommand(COMMAND);
+			COMMAND->default();
+			indexCmd = 0;
 		}
 	}
 
