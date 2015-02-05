@@ -1,4 +1,4 @@
-wMarcos 0.1
+wMarcos 0.1.1 a
 ===========
 
 Release date: 
@@ -16,8 +16,9 @@ Library
 		+ FileCopy
 		+ FileDel
 -	Dir:
-		? DirCopy
+		+ DirCopy
 		+ DirDel
+		+ DirMove
 		+ DirRename
 ==============================
 

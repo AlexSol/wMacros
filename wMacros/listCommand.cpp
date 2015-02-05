@@ -67,10 +67,7 @@ void RunWait(const char* cmd1, const char* cmd2)
 	int codError =  CreateProcess( NULL, const_cast<char*>(scmd2.c_str()), NULL, NULL, true, 0, NULL, NULL, &si, &pi);
 
     if(codError == 0) { 
-		codError = GetLastError();
-		TCHAR strMes[4096] = {0};
-		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, codError, 0, strMes , sizeof(strMes), NULL);
-		cout<< strMes <<endl;
+		m_FormatMessage(GetLastError());
 	}
 
    WaitForSingleObject(pi.hProcess, INFINITE);
@@ -87,15 +84,14 @@ void Open(const char* cmd1, const char* cmd2)
 void FileCopy(const char* cmd1, const char* cmd2)
 {
 	if( CopyFileW( charToWchar(cmd1).get(), charToWchar(cmd2).get(), FALSE) == 0	) { 
-		DWORD codError = GetLastError(); 
-		cout<< codError << endl;
+		m_FormatMessage(GetLastError());
 	}
 }
 
 void FileDel(const char* cmd1, const char* cmd2)
 {
-	if( DeleteFile(cmd1) == 0 ){
-		DWORD codError = GetLastError(); 
+	if( DeleteFileW(charToWchar(cmd1).get()) == 0 ){
+		m_FormatMessage(GetLastError());
 	}
 }
 
@@ -143,18 +139,16 @@ void DirOperation(const char* cmd1, const char* cmd2, const char opt)
 		optFunc = FO_RENAME;
 		break;
 	}
-	SHFILEOPSTRUCT sh;
+	SHFILEOPSTRUCTW sh;
 	ZeroMemory(&sh, sizeof(sh));
 	sh.wFunc = optFunc;
-	sh.pFrom = cmd1;
-	sh.pTo = cmd2;
+	sh.pFrom = charToWchar(cmd1).get();
+	sh.pTo = charToWchar(cmd2).get();
 	sh.fFlags =  FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_SILENT;
 	
-	DWORD codError =  SHFileOperation(&sh);
+	DWORD codError =  SHFileOperationW(&sh);
 
 	if( codError != 0 ) {
-		DWORD codError = GetLastError(); 
-		cout<< "Error  "<< codError <<endl;
 	}
 }
 
@@ -166,4 +160,12 @@ unique_ptr<WCHAR[]> charToWchar(const char* str)
 	MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str, -1, temp.get(), wstrlend);
 
 	return temp;
+}
+
+void m_FormatMessage(int codError)
+{
+	TCHAR strMes[4096] = { 0 };
+	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, codError, 0, strMes, sizeof(strMes), NULL);
+
+	cout << strMes << endl;
 }

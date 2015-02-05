@@ -11,9 +11,11 @@ void Open(const char* cmd1, const char* cmd2);
 void FileCopy(const char* cmd1, const char* cmd2);
 void FileDel(const char* cmd1, const char* cmd2);
 
-void DirOperation(const char* cmd1, const char* cmd2, const char opt);
 
-void DirCopy(const char* cmd1, char* cmd2);
+void DirOperation(const char* cmd1, const char* cmd2, const char opt);
+void DirCopy(const char* cmd1, const char* cmd2);
 void DirDel(const char* cmd1, const char* cmd2);
 void DirMove(const char* cmd1, const char* cmd2);
 void DirRename(const char* cmd1, const char* cmd2);
+
+void m_FormatMessage(int codError);

@@ -71,7 +71,10 @@ $RECYCLE.BIN/
 *.msp
 
 # Windows VS
+*.opensdf
 *.sdf
 ipch/*
-wMacros/Release/*
-Release/*
+wMacros/Release/
+wMacros/Release/wMacros.tlog/
+Release/
+*.tlog

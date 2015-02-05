@@ -11,16 +11,16 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-
+#include <memory>
 #include <string>
-//#include <locale> 
 #include <map>
 
 using namespace std;
 
 #include "listCommand.h"
 
-void DirCopy(const char* cmd1, char* cmd2);
+#include "version.h"
+#include "CResource.h"
 
 struct sCommand
 {
@@ -34,6 +34,7 @@ struct sCommand
 
 bool isNameMacros(char*);
 bool isScript();
+bool addResScript(const char* outFileExe, const char* inFileScript);
 
 void Fn();
 
@@ -44,16 +45,13 @@ void strTolower(std::string& str);
 int main(int argc, char* argv[])
 {
 	COMMAND = new sCommand;
-	bool foundScript = false;
 
-	//ShellExecute( NULL, TEXT("open"), "cmd /?", "", NULL, SW_SHOWNORMAL);
-
-	//if(isScript() == false){ MessageBox(0, "not found Script", "Error", MB_ICONERROR); } 
-
-	//if( isNameMacros(argv[0]) == true ) cout<< "true file name Macros" <<endl;
-	//if( ::MoveFileEx("D:\\Test", "c:\\Test\\", MOVEFILE_COPY_ALLOWED) == 0)
-	//cout<< GetLastError() << endl;
-
+	//if (isScript() == false){ MessageBox(0, "not found Script", "Error", MB_ICONERROR); return true; }
+	/*
+	if (strcmp(argv[2], "-b") == 0){
+		if (addResScript(argv[3], argv[4]) == false) { printf("Error create exe-file\n"); }
+	}
+	*/
 	Fn();
 	delete COMMAND;
 	ExitProcess(0);
@@ -102,8 +100,8 @@ void Fn()
 	listCommand.insert( pair<char*, Command>("FileCopy", FileCopy) );
 	listCommand.insert( pair<char*, Command>("FileDell", FileDel) );
 
-	//listCommand.insert( pair<char*, Command>("DirCopy", DirCopy) );
-	listCommand.insert( pair<char*, Command>("DirDell", DirDel) );
+	listCommand.insert( pair<char*, Command>("DirCopy", DirCopy) );
+	listCommand.insert( pair<char*, Command>("DirDel", DirDel) );
 	listCommand.insert( pair<char*, Command>("DirMove", DirMove) );
 	listCommand.insert( pair<char*, Command>("DirRename", DirRename) );
 
@@ -237,4 +235,53 @@ void strTolower(std::string& str)
 	{
 		str[i] = tolower(str[i]);
 	}
+}
+
+bool addResScript(const char* outFileExe, const char* inFileScript)
+{
+	const int sizeBuffer = MAX_PATH;
+	char exeFile[sizeBuffer] = {0};
+
+	GetModuleFileName(NULL, exeFile, sizeBuffer);
+
+	bool errorCod = ::CopyFile(exeFile, outFileExe, false);
+	if(errorCod == 0 ){ return false; }
+
+	std::unique_ptr<CResource> res(new CResource);
+
+	if (res->load(outFileExe) == true) { cout << "error load file" << endl; return false; }
+	
+
+	HANDLE hFile = CreateFile(inFileScript, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE) { return false; }
+	
+	const int maxSizeScript = 5242880;  // 5 MB
+	LARGE_INTEGER sizeFileScript = {0};
+
+	bool resSize = GetFileSizeEx(hFile, &sizeFileScript);
+
+	if ((resSize == INVALID_FILE_SIZE) || (sizeFileScript.QuadPart > maxSizeScript)) { CloseHandle(hFile); return false; }
+	
+	char* resData = new(char[sizeFileScript.QuadPart]);
+	memset(resData, 0, sizeFileScript.QuadPart);
+	
+	FILE *file;
+	file = fopen(inFileScript, "rb");
+
+	if (file == 0){ return false; }
+	
+	char t = 0;
+	for ( int i = 0; (t = fgetc(file)) != EOF; i++)
+	{
+		resData[i] = t;
+	}
+
+	fclose(file);
+
+	if (res->addRes(TypeRes::RCDATA, 1, &resData[0], sizeFileScript.QuadPart) != 4) { return false;  }
+
+	delete[] resData;
+
+	res->freeLibrary();
+	return true;
 }
