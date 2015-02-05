@@ -6,6 +6,8 @@
 #include <Windows.h>
 #include <Shellapi.h>
 #include <Shobjidl.h>
+#include <TlHelp32.h>
+
 #include <memory>
 #include "listCommand.h"
 
@@ -77,6 +79,36 @@ void RunWait(const char* cmd1, const char* cmd2)
    CloseHandle(pi.hThread);
 }
 
+void ProcessClose(const char* cmd1, const char* cmd2)
+{
+    HANDLE hndl = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0);
+    DWORD dwsma = GetLastError();
+    DWORD dwExitCode = 0;
+    PROCESSENTRY32  procEntry={0};
+    procEntry.dwSize = sizeof( PROCESSENTRY32 );
+    Process32First(hndl,&procEntry);
+    do
+    {
+        if(strcmpi(procEntry.szExeFile,cmd1) == 0 ){
+			DWORD dwDesiredAccess = PROCESS_TERMINATE;
+			BOOL  bInheritHandle  = FALSE;
+
+			HANDLE hProcess = OpenProcess(dwDesiredAccess, bInheritHandle, procEntry.th32ProcessID);
+			if (hProcess == NULL){ 
+				m_FormatMessage(GetLastError());
+			}
+			if (TerminateProcess(hProcess, 0) != 0){
+				m_FormatMessage(GetLastError());
+			}
+			CloseHandle(hProcess);
+			CloseHandle(hndl);
+        }
+    }while(Process32Next(hndl,&procEntry));
+	CloseHandle(hndl);
+
+    return;
+}
+
 void Open(const char* cmd1, const char* cmd2)
 {
 	ShellExecute( NULL, TEXT("open"), cmd1, cmd2, NULL, SW_SHOWNORMAL);
@@ -104,6 +136,15 @@ void DirCopy(const char* cmd1, const char* cmd2)
 void DirDel(const char* cmd1, const char* cmd2)
 {
 	DirOperation(cmd1, cmd2, 'd');
+}
+
+void DirCreate(const char* cmd1, const char* cmd2)
+{
+	if (::CreateDirectory(cmd1, NULL) == 0){
+		//DWORD codError = GetLastError();
+		m_FormatMessage(GetLastError());
+	}
+
 }
 
 void DirMove(const char* cmd1, const char* cmd2)

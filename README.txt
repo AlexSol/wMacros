@@ -5,13 +5,15 @@ Release date:
 
 Core
 ----
-
-- 
++DelSelf 
 
 Library
 -------
 -	Process:
 		+ Run
+		+ RunWait
+		+ Open
+		+ ProcessClose
 -	File:
 		+ FileCopy
 		+ FileDel
@@ -20,6 +22,7 @@ Library
 		+ DirDel
 		+ DirMove
 		+ DirRename
+		+? DirCreate
 ==============================
 
 -RunWait:

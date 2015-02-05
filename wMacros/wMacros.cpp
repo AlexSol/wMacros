@@ -103,6 +103,7 @@ void Fn()
 
 	listCommand.insert( pair<char*, Command>("Run", Run) );
 	listCommand.insert( pair<char*, Command>("RunWait", RunWait) );
+	listCommand.insert( pair<char*, Command>("ProcessClose", ProcessClose) );
 
 	listCommand.insert( pair<char*, Command>("Open", Open) );
 
@@ -111,6 +112,7 @@ void Fn()
 
 	listCommand.insert( pair<char*, Command>("DirCopy", DirCopy) );
 	listCommand.insert( pair<char*, Command>("DirDel", DirDel) );
+	listCommand.insert(pair<char*, Command>("DirCreate", DirCreate));
 	listCommand.insert( pair<char*, Command>("DirMove", DirMove) );
 	listCommand.insert( pair<char*, Command>("DirRename", DirRename) );
 
