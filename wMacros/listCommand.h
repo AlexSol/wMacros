@@ -20,4 +20,7 @@ void DirCreate(const char* cmd1, const char* cmd2);
 void DirMove(const char* cmd1, const char* cmd2);
 void DirRename(const char* cmd1, const char* cmd2);
 
+void DownloadFile(const char* cmd1, const char* cmd2);
+
+
 void m_FormatMessage(int codError);

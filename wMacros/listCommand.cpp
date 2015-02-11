@@ -7,6 +7,7 @@
 #include <Shellapi.h>
 #include <Shobjidl.h>
 #include <TlHelp32.h>
+#include <wininet.h>
 
 #include <memory>
 #include "listCommand.h"
@@ -192,6 +193,84 @@ void DirOperation(const char* cmd1, const char* cmd2, const char opt)
 
 	if( codError != 0 ) {
 	}
+}
+
+
+void DownloadFile(const char* cmd1, const char* cmd2)
+{
+	const char* userAgent = "Mozilla/5.0 (Windows NT) AppleWebKit/537.36 (KHTML, like Gecko)";
+	HINTERNET hInternet = ::InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+	
+	if (hInternet != NULL){
+		/*
+		cout << "open" << endl;
+		HINTERNET hConnect = ::InternetConnect(hInternet, "www.ex.ua", INTERNET_DEFAULT_HTTP_PORT,	NULL, NULL,	INTERNET_SERVICE_HTTP, 0, 1u);
+		if (hConnect != NULL){
+			cout << "InternetConnect" << endl;
+			DWORD dwOpenRequestFlags = INTERNET_FLAG_KEEP_CONNECTION | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP |
+				INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
+				INTERNET_FLAG_KEEP_CONNECTION |
+				INTERNET_FLAG_NO_AUTH |
+				INTERNET_FLAG_NO_AUTO_REDIRECT |
+				INTERNET_FLAG_NO_COOKIES |
+				INTERNET_FLAG_NO_UI |
+				INTERNET_FLAG_RELOAD;
+			;
+			HINTERNET hRequest = ::HttpOpenRequest(hConnect, "GET", "get/150410685", NULL, "www.ex.ua", NULL, dwOpenRequestFlags, 1);
+			if (hRequest != NULL){
+				cout << "Open REquest" << endl;
+				bool bSend = HttpSendRequest(hRequest, NULL, 0, NULL, 0);
+				if (bSend != false){
+					DWORD dwCodeLen = 120*4;
+					char a[120*3] = { 0 };
+					DWORD ind = 0;
+					HttpQueryInfo(hRequest, HTTP_QUERY_RAW_HEADERS_CRLF, a, &dwCodeLen, 0);
+					char *t = strstr(a, "Location:");
+
+					cout << t+strlen("Location:")+1 << endl;
+					HINTERNET hRequest1 = ::HttpOpenRequest(hConnect, "GET", t, NULL, "www.ex.ua", NULL, dwOpenRequestFlags, 1);
+					bool bSend = HttpSendRequest(hRequest1, NULL, 0, NULL, 0);
+
+					char  szData[1024];
+					DWORD dwBytesRead;
+					BOOL bRead = ::InternetReadFile(hRequest1, szData, sizeof(szData)-1, &dwBytesRead);
+					cout << dwBytesRead << "  " << szData << endl;
+				}
+			}
+			InternetCloseHandle(hRequest);
+		}
+		InternetCloseHandle(hConnect);
+		*/
+		
+		HINTERNET hOpenUrl = ::InternetOpenUrl(hInternet, cmd1, NULL, 0, INTERNET_FLAG_NO_AUTO_REDIRECT | INTERNET_FLAG_RELOAD, 0);
+		if (hOpenUrl != NULL){
+			
+			const DWORD sizeBuffer = 1024;
+			DWORD dwBytesRead = 0;
+			char buffer[sizeBuffer] = {0};
+			FILE *outFile;
+			outFile = fopen(cmd2, "wb");
+			size_t count;
+			if (outFile == NULL) { cout << "Error create file  " << cmd2 << endl; }
+			int  counter = 0;
+			do
+			{
+				if(InternetReadFile(hOpenUrl, buffer, sizeBuffer, &dwBytesRead)){
+					++counter;
+					cout << counter << "  " << dwBytesRead << endl;
+					count = fwrite(buffer, dwBytesRead, 1, outFile);
+				}else {
+					break;
+				}
+			} while (dwBytesRead == sizeBuffer);
+			fclose(outFile);
+			
+		}
+		::InternetCloseHandle(hOpenUrl);
+	}
+
+	::InternetCloseHandle(hInternet);
+
 }
 
 unique_ptr<WCHAR[]> charToWchar(const char* str)

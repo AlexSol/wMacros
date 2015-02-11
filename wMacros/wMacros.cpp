@@ -4,6 +4,7 @@
 //#pragma comment(linker,"/NODEFAULTLIB")
 #pragma comment(linker, "/MERGE:.CRT=.text")
 #pragma comment(linker, "/merge:.rdata=.text")
+#pragma comment(lib,"wininet")
 
 #include "stdafx.h"
 #include <Windows.h>
@@ -52,6 +53,10 @@ void strTolower(std::string& str);
 
 int main(int argc, char* argv[])
 {
+
+	//::RegDeleteKey(HKEY_CURRENT_USER, "Software\\Alawar\\Wrapper");
+	DownloadFile("https://www.google.com.ua/images/srpr/logo11w.png", "D:\\logo11w.png");
+	return 0;
 	COMMAND = new sCommand;
 	COMMAND->default();
 
