@@ -22,6 +22,7 @@ using namespace std;
 
 #include "version.h"
 #include "CResource.h"
+#include "File.h"
 
 struct sCommand
 {
@@ -53,7 +54,13 @@ void strTolower(std::string& str);
 
 int main(int argc, char* argv[])
 {
+	
+	File f;
+	f.open("D:\\TT.txt", GENERIC_WRITE, CREATE_ALWAYS);
+	char* ff = "qwertyuiiop";
+	f.write(ff, lstrlen(ff));
 
+	return 0;
 	//::RegDeleteKey(HKEY_CURRENT_USER, "Software\\Alawar\\Wrapper");
 	DownloadFile("https://www.google.com.ua/images/srpr/logo11w.png", "D:\\logo11w.png");
 	return 0;
@@ -283,19 +290,17 @@ bool addResScript(const char* outFileExe, const char* inFileScript)
 
 	if (res->load(outFileExe) == true) { cout << "error load file" << endl; return false; }
 	
+	File fileScript;
+	fileScript.open(inFileScript, GENERIC_READ, OPEN_EXISTING);
 
-	HANDLE hFile = CreateFile(inFileScript, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hFile == INVALID_HANDLE_VALUE) { return false; }
-	
 	const int maxSizeScript = 5242880;  // 5 MB
-	LARGE_INTEGER sizeFileScript = {0};
+	long long sizeFileScript = fileScript.getSize();
 
-	bool resSize = GetFileSizeEx(hFile, &sizeFileScript);
-
-	if ((resSize == INVALID_FILE_SIZE) || (sizeFileScript.QuadPart > maxSizeScript)) { CloseHandle(hFile); return false; }
+	if ( sizeFileScript > maxSizeScript ) { return false; }
 	
-	char* resData = new(char[sizeFileScript.QuadPart]);
-	memset(resData, 0, sizeFileScript.QuadPart);
+	std::unique_ptr<char> resData(new char[sizeFileScript] );
+	memset(resData.get(), 0, sizeFileScript);
+
 	
 	FILE *file;
 	file = fopen(inFileScript, "rb");
@@ -305,14 +310,12 @@ bool addResScript(const char* outFileExe, const char* inFileScript)
 	char t = 0;
 	for ( int i = 0; (t = fgetc(file)) != EOF; i++)
 	{
-		resData[i] = t;
+		resData.get()[i] = t;
 	}
 
 	fclose(file);
 
-	if (res->addRes(TypeRes::RCDATA, 1, &resData[0], sizeFileScript.QuadPart) != 4) { return false;  }
-
-	delete[] resData;
+	if (res->addRes(TypeRes::RCDATA, 1, (void*)(resData.get()), sizeFileScript) != 4) { return false;  }
 
 	res->freeLibrary();
 	return true;
